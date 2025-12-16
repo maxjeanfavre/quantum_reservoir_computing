@@ -1,73 +1,16 @@
 # Quantum Reservoir Computing
 
-A Python implementation of quantum reservoir computing for classification tasks. This project implements quantum reservoirs using steady-state density matrices and compares them with classical Echo State Networks (ESN) and linear baselines.
+A Python implementation of quantum reservoir computing for classification tasks. This project implements both **static (steady-state)** and **dynamical** quantum reservoirs using density matrices and compares them with classical Echo State Networks (ESN) and linear baselines.
 
 ## Installation
 
-### Prerequisites
+Install the required dependencies:
 
-- Python 3.8, 3.9, 3.10, or 3.11 (Python 3.12+ not yet supported)
-- pip (Python package manager)
-
-### Option 1: Using pip with virtual environment (Recommended)
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/maxjeanfavre/quantum_reservoir_compting.git
-   cd quantum_reservoir_compting
-   ```
-
-2. Create and activate a virtual environment:
-   ```bash
-   # On Linux/Mac:
-   python -m venv venv
-   source venv/bin/activate
-   
-   # On Windows:
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-3. Install the package and dependencies:
-   ```bash
-   # Install from pyproject.toml (recommended)
-   pip install -e .
-   
-   # Or install dependencies directly
-   pip install -r requirements.txt
-   ```
-
-### Option 2: Using conda
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/maxjeanfavre/quantum_reservoir_compting.git
-   cd quantum_reservoir_compting
-   ```
-
-2. Create and activate a conda environment:
-   ```bash
-   conda env create -f environment.yml
-   conda activate quantum-reservoir-computing
-   ```
-
-### Option 3: Direct installation
-
-If you prefer not to use a virtual environment:
 ```bash
 pip install -r requirements.txt
 ```
 
 **Note:** Using a virtual environment is strongly recommended to avoid conflicts with other Python packages.
-
-### Verify Installation
-
-After installation, verify that everything works:
-```bash
-python scripts/test_installation.py
-```
-
-This will run a quick test to ensure all dependencies are installed correctly and the basic functionality works.
 
 ## Requirements
 
@@ -81,7 +24,14 @@ This will run a quick test to ensure all dependencies are installed correctly an
 
 ### Running Experiments
 
-The main entry point is `run_experiments.py`, which provides a command-line interface for running quantum reservoir computing experiments.
+The project provides two main entry points:
+
+- **`run_experiments.py`**: For static (steady-state) quantum reservoir experiments on 2D classification tasks
+- **`run_dynamical.py`**: For dynamical quantum reservoir experiments on sequential tasks (e.g., Sine/Square waveform classification)
+
+#### Static Reservoir Experiments (`run_experiments.py`)
+
+This script runs quantum reservoirs using steady-state density matrices for 2D classification tasks.
 
 #### Basic Examples
 
@@ -135,6 +85,45 @@ python run_experiments.py --task two_u --encodings bare --esn --esn-hidden 20 --
 **Output:**
 - `--quiet`: Reduce output verbosity
 
+#### Dynamical Reservoir Experiments (`run_dynamical.py`)
+
+This script runs dynamical quantum reservoirs (or ESN) on sequential tasks where the reservoir state evolves over time.
+
+**Example usage:**
+```bash
+# Quantum Reservoir (QRC) with dynamical evolution
+python run_dynamical.py --reservoir qrc --encoding bare --feature-map features --dt 0.1
+
+# Echo State Network (ESN)
+python run_dynamical.py --reservoir esn --n-reservoir 300 --spectral-radius 0.9 --leak-rate 0.3 --washout 200
+
+# Multiple runs with parallel processing
+python run_dynamical.py --reservoir qrc --encoding gamma --n-run 10 --n-jobs -1
+```
+
+**Reservoir Selection:**
+- `--reservoir`: Choose `qrc` (quantum) or `esn` (echo state network)
+
+**QRC-specific Parameters:**
+- `--encoding`: Encoding method (`bare`, `gamma`, `dephase`, `rich`)
+- `--feature-map`: Feature extraction (`features`, `populations`, `pauli`)
+- `--dt`: Time step for quantum evolution
+- `--init-state`: Initial quantum state (optional)
+- `--init-from-ss`: Start from steady state at u0
+
+**ESN-specific Parameters:**
+- `--n-reservoir`: Number of reservoir units
+- `--spectral-radius`: Spectral radius of weight matrix
+- `--sparsity`: Sparsity of connections
+- `--leak-rate`: Leaky integration rate
+- `--washout`: Number of initial timesteps to discard
+
+**Common Parameters:**
+- `--n-train`, `--n-test`: Number of training/test samples
+- `--n-run`: Number of independent runs
+- `--n-jobs`: Parallel jobs (-1 for all cores)
+- `--lam`: Ridge regularization parameter
+
 ### Visualizing Features
 
 The `scripts/inspect_qrc_features.py` script generates visualizations of quantum reservoir features and quantumness measures:
@@ -162,7 +151,7 @@ This script creates 2D heatmaps and 1D slices showing how features and quantumne
 ## Project Structure
 
 ```
-quantum_reservoir_compting/
+quantum_reservoir_computing/
 ├── quantum/              # Quantum system implementation
 │   ├── quantum_system.py      # Core quantum system dynamics
 │   ├── encodings.py            # Input encoding functions
@@ -170,14 +159,17 @@ quantum_reservoir_compting/
 │   └── entanglement_measures.py # Quantumness/entanglement measures
 ├── reservoirs/           # Reservoir implementations
 │   ├── base.py                # Base reservoir interface
-│   ├── quantum_reservoir.py   # Quantum steady-state reservoir
-│   └── esn.py                 # Echo State Network (classical baseline)
+│   ├── quantum_reservoir.py   # Quantum steady-state reservoir (static)
+│   ├── quantum_dynamical.py   # Quantum dynamical reservoir
+│   ├── esn.py                 # Echo State Network (classical baseline, static)
+│   └── esn_dynamical.py       # Echo State Network (dynamical)
 ├── tasks/                # Classification tasks
 │   ├── base.py                # Base task interface
 │   ├── two_u.py               # Two U-shaped classes
 │   ├── spirals.py             # Two spirals
 │   ├── circles.py             # Two circles
-│   └── gaussians.py           # Two Gaussians
+│   ├── gaussians.py           # Two Gaussians
+│   └── sinesquare.py          # Sine/Square waveform task (for dynamical experiments)
 ├── readout/              # Readout layer
 │   └── linear.py             # Linear (ridge) classifier
 ├── experiments/         # Experiment framework
@@ -192,7 +184,8 @@ quantum_reservoir_compting/
 │   ├── run_circle.ipynb
 │   ├── run_spiral.ipynb
 │   └── run_u.ipynb
-└── run_experiments.py    # Main CLI script (entry point)
+├── run_experiments.py    # Static reservoir experiments (steady-state)
+└── run_dynamical.py      # Dynamical reservoir experiments (time-evolution)
 ```
 
 ## Available Encodings
@@ -220,15 +213,21 @@ The following encodings are available for quantum reservoirs:
 
 ## How It Works
 
+### Static (Steady-State) Reservoirs
+
 1. **Input Encoding**: 2D input data is encoded into quantum system parameters (drives, couplings, decay rates, etc.)
-
 2. **Quantum Evolution**: The quantum system evolves to a steady state, represented by a density matrix
-
 3. **Feature Extraction**: Features are extracted from the steady-state density matrix (e.g., matrix elements, Pauli features, populations)
-
 4. **Classification**: A linear (ridge) classifier is trained on the extracted features
-
 5. **Evaluation**: Performance is measured via classification accuracy on train and test sets
+
+### Dynamical Reservoirs
+
+1. **Input Encoding**: Sequential input data is encoded into quantum system parameters at each timestep
+2. **Time Evolution**: The quantum system evolves dynamically according to the Lindblad master equation, maintaining an internal quantum state
+3. **Feature Extraction**: Features are extracted from the density matrix at each timestep
+4. **Classification**: A linear (ridge) classifier is trained on the sequence of extracted features
+5. **Evaluation**: Performance is measured via classification accuracy on train and test sequences
 
 ## Troubleshooting
 
