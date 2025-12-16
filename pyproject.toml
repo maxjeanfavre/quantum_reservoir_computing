@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantum-reservoir-computing"
+version = "0.1.0"
+description = "A Python implementation of quantum reservoir computing for classification tasks"
+readme = "README.md"
+requires-python = ">=3.8,<3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "Maxime Jeanfavre"}
+]
+keywords = ["quantum computing", "reservoir computing", "machine learning", "classification"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "numpy>=1.20.0,<2.0.0",
+    "qutip>=4.7.0",
+    "joblib>=1.0.0",
+    "matplotlib>=3.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+run-experiments = "run_experiments:main"
+inspect-qrc-features = "scripts.inspect_qrc_features:main"
+
+[tool.setuptools]
+packages = ["quantum", "reservoirs", "tasks", "readout", "experiments", "scripts"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
